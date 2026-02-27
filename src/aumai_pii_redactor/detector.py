@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterator
+from collections.abc import Iterator
 
 from aumai_pii_redactor.models import PIIMatch, PIIType, RedactionConfig
 
@@ -15,11 +15,21 @@ from aumai_pii_redactor.models import PIIMatch, PIIType, RedactionConfig
 # Patterns are ordered from most-specific to least-specific to reduce overlap.
 
 _BUILTIN_PATTERNS: list[tuple[PIIType, re.Pattern[str], float]] = [
-    # SSN — must come before generic numbers
+    # SSN — must come before generic numbers.
+    # Excludes invalid area numbers (000, 666, 900-999), invalid group number (00),
+    # and invalid serial number (0000) per SSA published rules.  Confidence is
+    # intentionally below the original 0.95 because a regex alone cannot fully
+    # disambiguate SSNs from similarly-formatted phone or account numbers.
     (
         PIIType.ssn,
-        re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b"),
-        0.95,
+        re.compile(
+            r"\b(?!000|666|9\d{2})\d{3}"  # area: not 000, 666, or 900-999
+            r"[-\s]?"
+            r"(?!00)\d{2}"  # group: not 00
+            r"[-\s]?"
+            r"(?!0000)\d{4}\b"  # serial: not 0000
+        ),
+        0.90,
     ),
     # Credit card (Luhn-candidate 13-19 digit sequences with optional separators)
     (
@@ -111,7 +121,7 @@ class PIIDetector:
     def __init__(self, config: RedactionConfig) -> None:
         self._config = config
         self._custom_patterns: list[tuple[PIIType, re.Pattern[str], float]] = []
-        for label, raw_pattern in config.custom_patterns.items():
+        for _label, raw_pattern in config.custom_patterns.items():
             compiled = re.compile(raw_pattern)
             self._custom_patterns.append((PIIType.custom, compiled, 0.80))
 

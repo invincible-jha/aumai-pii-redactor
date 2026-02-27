@@ -6,14 +6,12 @@ import hashlib
 
 from aumai_pii_redactor.detector import PIIDetector
 from aumai_pii_redactor.models import (
-    PIIMatch,
     PIIType,
     RedactionConfig,
     RedactionResult,
     RedactionRule,
     RedactionStrategy,
 )
-
 
 # ---------------------------------------------------------------------------
 # Strategy implementations

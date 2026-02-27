@@ -12,11 +12,9 @@ import click
 from aumai_pii_redactor.detector import PIIDetector
 from aumai_pii_redactor.models import (
     RedactionConfig,
-    RedactionRule,
     RedactionStrategy,
 )
 from aumai_pii_redactor.redactor import PIIRedactor
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -31,7 +29,10 @@ def _load_config(config_path: str) -> RedactionConfig:
             import yaml  # type: ignore[import-untyped]
             data: dict[str, Any] = yaml.safe_load(raw)
         except ImportError:
-            click.echo("PyYAML required for YAML config. Install: pip install pyyaml", err=True)
+            click.echo(
+                "PyYAML required for YAML config. Install: pip install pyyaml",
+                err=True,
+            )
             sys.exit(1)
     else:
         data = json.loads(raw)
@@ -57,8 +58,16 @@ def main() -> None:
 
 
 @main.command("scan")
-@click.option("--input", "input_path", required=True, metavar="PATH", help="Text file to scan.")
-@click.option("--config", "config_path", default=None, metavar="PATH", help="Redaction config file.")
+@click.option(
+    "--input", "input_path", required=True, metavar="PATH", help="Text file to scan."
+)
+@click.option(
+    "--config",
+    "config_path",
+    default=None,
+    metavar="PATH",
+    help="Redaction config file.",
+)
 @click.option("--json-output", is_flag=True, help="Emit results as JSON.")
 def scan_command(input_path: str, config_path: str | None, json_output: bool) -> None:
     """Scan a text file for PII and report all matches."""
@@ -89,10 +98,25 @@ def scan_command(input_path: str, config_path: str | None, json_output: bool) ->
 
 
 @main.command("redact")
-@click.option("--input", "input_path", required=True, metavar="PATH", help="Input text file.")
-@click.option("--output", "output_path", required=True, metavar="PATH", help="Output text file.")
-@click.option("--config", "config_path", default=None, metavar="PATH", help="Redaction config file.")
-@click.option("--strategy", type=click.Choice(["mask", "hash", "remove", "replace"]), default="mask", show_default=True)
+@click.option(
+    "--input", "input_path", required=True, metavar="PATH", help="Input text file."
+)
+@click.option(
+    "--output", "output_path", required=True, metavar="PATH", help="Output text file."
+)
+@click.option(
+    "--config",
+    "config_path",
+    default=None,
+    metavar="PATH",
+    help="Redaction config file.",
+)
+@click.option(
+    "--strategy",
+    type=click.Choice(["mask", "hash", "remove", "replace"]),
+    default="mask",
+    show_default=True,
+)
 def redact_command(
     input_path: str,
     output_path: str,
@@ -137,13 +161,24 @@ def configure_command(output: str) -> None:
                 "rules": [
                     {"pii_type": "email", "strategy": "mask"},
                     {"pii_type": "phone", "strategy": "mask"},
-                    {"pii_type": "ssn", "strategy": "replace", "replacement": "[SSN REDACTED]"},
-                    {"pii_type": "credit_card", "strategy": "replace", "replacement": "[CARD REDACTED]"},
+                    {
+                        "pii_type": "ssn",
+                        "strategy": "replace",
+                        "replacement": "[SSN REDACTED]",
+                    },
+                    {
+                        "pii_type": "credit_card",
+                        "strategy": "replace",
+                        "replacement": "[CARD REDACTED]",
+                    },
                     {"pii_type": "ip_address", "strategy": "hash"},
                 ],
                 "custom_patterns": {},
             }
-            out_path.write_text(yaml.dump(config_dict, default_flow_style=False), encoding="utf-8")
+            out_path.write_text(
+                yaml.dump(config_dict, default_flow_style=False),
+                encoding="utf-8",
+            )
         except ImportError:
             click.echo("PyYAML required. Falling back to JSON.", err=True)
             out_path = out_path.with_suffix(".json")
@@ -154,8 +189,16 @@ def configure_command(output: str) -> None:
             "rules": [
                 {"pii_type": "email", "strategy": "mask"},
                 {"pii_type": "phone", "strategy": "mask"},
-                {"pii_type": "ssn", "strategy": "replace", "replacement": "[SSN REDACTED]"},
-                {"pii_type": "credit_card", "strategy": "replace", "replacement": "[CARD REDACTED]"},
+                {
+                    "pii_type": "ssn",
+                    "strategy": "replace",
+                    "replacement": "[SSN REDACTED]",
+                },
+                {
+                    "pii_type": "credit_card",
+                    "strategy": "replace",
+                    "replacement": "[CARD REDACTED]",
+                },
                 {"pii_type": "ip_address", "strategy": "hash"},
             ],
             "custom_patterns": {},
