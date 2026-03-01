@@ -24,6 +24,10 @@ dependencies = [
     "pydantic>=2.0",
     "click>=8.0",
     "opentelemetry-sdk>=1.20",
+    "aumai-store>=0.1.0",
+    "aumai-async-core>=0.1.0",
+    "aumai-llm-core>=0.1.0",
+    "aumai-integration>=0.1.0",
 ]
 
 [project.optional-dependencies]
